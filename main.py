@@ -3,7 +3,7 @@ from flask import Flask, request, render_template,Response
 import os
 
 
-app = Flask(__name__,template_folder="html")
+app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -12,8 +12,8 @@ def index():
         img = ImagesToCartoon("img/" + image.filename)
         cartoon_image =img.convert_image()
         # save image as output.jpg
-        cv2.imwrite("static/output.jpg", cartoon_image)
-        full_filename = os.path.join('static', "output.jpg")
+        cv2.imwrite("static/img/output.jpg", cartoon_image)
+        full_filename = "static/img/output.jpg"
 
         return render_template("result.html", user_image=full_filename)
     return render_template("index.html")
@@ -27,7 +27,7 @@ def send_file_custom(file, attachment_filename=None):
 # define endpoint for downloading the image
 @app.route("/download")
 def download():
-    return send_file_custom("static/output.jpg", attachment_filename="output.jpg")
+    return send_file_custom("static/img/output.jpg", attachment_filename="output.jpg")
 
 class ImagesToCartoon:
     def __init__(self, image_file):
