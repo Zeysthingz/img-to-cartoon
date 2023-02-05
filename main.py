@@ -1,8 +1,38 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+from flask import Flask, request, render_template,Response
+import os
 
+file_name=os.path.join('static')
 
+app = Flask(__name__,template_folder="html")
+app.config["UPLOAD_FOLDER"] = file_name
+@app.route("/", methods=["GET", "POST"])
+def index():
+    # define methods get and post for the form
+
+    if request.method == "POST":
+        # Get the uploaded image
+        image = request.files["image"]
+        # Save the uploaded image
+        # call the class
+        img = ImagesToCartoon("img/" + image.filename)
+        cartoon_image =img.convert_image()
+        # save image as output.jpg
+        cv2.imwrite("static/output.jpg", cartoon_image)
+        full_filename = os.path.join(app.config["UPLOAD_FOLDER"], "output.jpg")
+
+        return render_template("result.html", user_image=full_filename)
+    return render_template("index.html")
+def send_file_custom(file, attachment_filename=None):
+    response = Response()
+    response.data = open(file, "rb").read()
+    response.headers["Content-Type"] = "application/octet-stream"
+    if attachment_filename:
+        response.headers["Content-Disposition"] = "attachment; filename={}".format(attachment_filename)
+    return response
+@app.route("/download")
+def download():
+    return send_file_custom("static/output.jpg", attachment_filename="output.jpg")
 
 class ImagesToCartoon:
     def __init__(self, image_file):
@@ -23,8 +53,5 @@ class ImagesToCartoon:
 
 
 if __name__ == "__main__":
-    image = ImagesToCartoon("img/michael.jpg")
-    img =image.convert_image()
-    cv2.imwrite("img/cartoon-michael.jpg", img)
-#     save the image
+    app.run(debug=True)
 
